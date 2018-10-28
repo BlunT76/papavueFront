@@ -15,6 +15,8 @@ export default new Vuex.Store({
     loggedIn:false,
     user_token: localStorage.getItem("user_token") || "",
     showRegister: false,
+    userId:0,
+    username:'User'
   },
   mutations: {
     //CATEGORIES SECTION
@@ -49,7 +51,7 @@ export default new Vuex.Store({
         'cat_id':link[2]
       }
       //state.linkArray.push(link)
-      console.log(API_URL + 'addlink',{"url":obj.url,"desc":obj.desc,"cat_id":obj.cat_id},{headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest", 'Authorization': 'Bearer ' + state.user_token }})
+      //console.log(API_URL + 'addlink',{"url":obj.url,"desc":obj.desc,"cat_id":obj.cat_id},{headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest", 'Authorization': 'Bearer ' + state.user_token }})
       axios.post(API_URL + 'addlink',{"url":obj.url,"desc":obj.desc,"cat_id":obj.cat_id},{headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest", 'Authorization': 'Bearer ' + state.user_token }})
       .then((response) =>{
         console.log(response)
@@ -58,7 +60,14 @@ export default new Vuex.Store({
       })
     },
     REMOVE_LINK:(state, link) => {
-      state.linkArray.splice(link,1)
+      console.log("STORE REMOVE LINK", link)
+      axios.post(API_URL + 'removelink',{"linkid":link},{headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest", 'Authorization': 'Bearer ' + state.user_token }})
+      .then((response) =>{
+        console.log(response)
+      }, (error) => {
+        console.log(error)
+      })
+      //state.linkArray.splice(link,1)
     },
     FETCH_LINK:(state) =>{
       console.log(API_URL + 'links')
@@ -80,15 +89,25 @@ export default new Vuex.Store({
     },
     //AUTHENTIFICATION SECTION
     LOGIN:(state,user) => {
-      console.log(user)
+      //console.log(user)
       state.loggedIn = true;
+    },
+    STOREUSERID:(state,id) => {
+      //console.log(id)
+      state.userId = id
+    },
+    STOREUSERNAME:(state,username) => {
+      console.log(username)
+      state.username = username
     },
     LOGOUT:(state,user) => {
       localStorage.removeItem('user_token')
+      localStorage.removeItem("userId")
+      localStorage.removeItem("username")
       state.loggedIn = false
       state.catArray = []
-      console.log("LOGOUT")
-      console.table(state.catArray)
+      //console.log("LOGOUT")
+      //console.table(state.catArray)
       Router.push('/')
     },
     REGISTER:(state,user)=>{
@@ -111,9 +130,10 @@ export default new Vuex.Store({
     addCategory: (context,cat) => {
       context.commit("ADD_CATEGORY", cat)
     },
-    removeLink: (context, link) => {       // Add this:
-      context.commit("REMOVE_LINK", link)
-    },
+    // removeLink: (context, link,cat) => {       // Add this:
+    //   console.log('ACTION REMOVE LINK: ',link,cat)
+    //   //context.commit("REMOVE_LINK", link)
+    // },
     uploadLink: (context,link) => {
       context.commit("UPLOAD_LINK", link)
     },
@@ -124,9 +144,14 @@ export default new Vuex.Store({
       })
       axios.post(API_URL + 'auth/login',datauser,{headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" }})
       .then((response) => {
-        console.log(response)
+        console.log('HERE',response.data)
         let loggedIn = true
         context.commit("LOGIN", loggedIn)
+        localStorage.setItem("userId", response.data.user_id)
+        context.commit("STOREUSERID", response.data.user_id)
+        localStorage.setItem("username",response.data.username)
+        context.commit('STOREUSERNAME',response.data.username)
+
         //state.loggedIn = true;
         localStorage.setItem("user_token", response.data.access_token )
         Router.push('/')
@@ -138,7 +163,7 @@ export default new Vuex.Store({
         //   }, (error) => {
         //     console.log(error)
         // })
-        console.log("LOGIN")
+        //console.log("LOGIN")
         //console.table(state.catArray)
       }, (error) =>{
         console.log(error)
@@ -156,7 +181,7 @@ export default new Vuex.Store({
     },
     fetchCat: (context) => {
       let tok = localStorage.getItem('user_token')
-      console.log(tok)
+      //console.log(tok)
       axios.get(API_URL + 'categories',{headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest", 'Authorization': 'Bearer ' + tok }})
         .then((response) => {
             console.log('FETCHCAT:')
@@ -179,6 +204,14 @@ export default new Vuex.Store({
     },
     getToken: state => {
       return state.user_token
+    },
+    getUserId: state => {
+      //console.log('USERID: ',state.user)
+      return state.userId
+    },
+    getUsername: state => {
+      console.log(state.username)
+      return state.username
     }
   }
 })

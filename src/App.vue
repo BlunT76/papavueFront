@@ -1,17 +1,7 @@
 <template>
   <div id="app">
     <Navbar />
-    
-      <router-view></router-view>
-      <!-- <b-row>
-      <b-col cols="4"> -->
-        <!-- <Category /> -->
-      <!-- </b-col>
-      <b-col cols="8">
-        <Link />
-      </b-col>
-      </b-row> -->
-    
+    <router-view></router-view>
   </div>
 </template>
 
@@ -19,13 +9,12 @@
 import Vue from 'vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-//import HelloWorld from './components/HelloWorld.vue'
-import Category from './components/Category.vue'
-//import Link from './components/Link.vue'
-import Navbar from './components/Navbar.vue'
 
+import Category from './components/Category.vue'
+import Navbar from './components/Navbar.vue'
 import LoginPage from './login/LoginPage'
 import RegisterPage from './login/RegisterPage'
+
 
 import axios from 'axios'
 import VueRouter from 'vue-router'
@@ -38,9 +27,7 @@ export default {
     Navbar,
     LoginPage,
     RegisterPage,
-    //HelloWorld,
-    //Link,
-    Category
+    Category,
   },
   data: function (){
     return {
@@ -57,7 +44,8 @@ export default {
     ...mapMutations([
       'ADD_LINK',
       'FETCH_LINK',
-      'FETCH_CAT'
+      'FETCH_CAT',
+      'STOREUSERID'
     ]),
     addLink: function(){
       this.ADD_LINK(this.newLink)
@@ -76,6 +64,10 @@ export default {
     //if(mapState.user_token && !mapState.user_token == ""){
       //this.fetchCat()
     //}
+    if(localStorage.getItem("userId")){
+      this.STOREUSERID(localStorage.getItem("userId"))
+      //this.STOREUSERNAME(localStorage.getItem("username"))
+    }
     
   }
 }
